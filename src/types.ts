@@ -1,7 +1,10 @@
 export interface AppProps {
     todos: Todo[]
 }
-interface Todo {
+export type Todos = Todo[]
+
+export interface Todo {
     isComplete: boolean,
-    text: string
+    text: string | undefined,
+    id: number
 }
