@@ -1,39 +1,12 @@
-import React, { MouseEvent, FormEvent, useState } from "react";
+import React, { useState } from "react";
 import { connect, MapDispatchToProps } from "react-redux";
-import { Todos, Todo } from "./types";
-import uuid from "uuid";
-
-interface Actions {
-  type: string;
-  id: string;
-  text?: string;
-}
-
-export const todoReducer = (state: Todos, action: Actions) => {
-  switch (action.type) {
-    case "DELETE_TODO":
-      return state.filter(t => t.id !== action.id);
-    case "TOGGLE_TODO":
-      return state.map(t =>
-        t.id === action.id ? { ...t, isComplete: !t.isComplete } : t
-      );
-    case "ADD_TODO":
-      const newTodo: Todo = {
-        text: action.text,
-        id: action.id,
-        isComplete: false
-      };
-      return [...state, newTodo];
-    default:
-      return state;
-  }
-};
+import { Todos } from "./types";
+import todoActions from "./actions";
 
 function App(props: any) {
   const [newTodo, setNewTodo] = useState<string>("");
   const [showIncompleteTodos, setShowIncompleteTodos] = useState(false);
   const todos: Todos = props.todos;
-  console.log("redux state", todos);
   return (
     <div>
       <form onSubmit={event => props.addTodo(event, newTodo)}>
@@ -74,40 +47,14 @@ function App(props: any) {
   );
 }
 
-const deleteTodo = (
-  e: MouseEvent<HTMLButtonElement>,
-  index: string
-): Actions => {
-  return {
-    type: "DELETE_TODO",
-    id: index
-  };
-};
-
-const toggleTodo = (e: MouseEvent<HTMLLIElement>, index: string): Actions => {
-  return {
-    type: "TOGGLE_TODO",
-    id: index
-  };
-};
-
-const addTodo = (e: FormEvent<HTMLFormElement>, todoText: string): Actions => {
-  e.preventDefault();
-  return {
-    type: "ADD_TODO",
-    id: uuid(),
-    text: todoText
-  };
-};
-
 const mapStateToProps = (state: Todos, ownProps: Todos) => ({
   todos: state
 });
 
 const mapDispatchToProps: MapDispatchToProps<any, any> = {
-  deleteTodo,
-  toggleTodo,
-  addTodo
+  deleteTodo: todoActions.deleteTodo,
+  toggleTodo: todoActions.toggleTodo,
+  addTodo: todoActions.addTodo
 };
 
 export default connect(
