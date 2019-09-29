@@ -1,10 +1,11 @@
 import React, { MouseEvent, FormEvent, useState } from "react";
 import { connect, MapDispatchToProps } from "react-redux";
 import { Todos, Todo } from "./types";
+import uuid from "uuid";
 
 interface Actions {
   type: string;
-  id: number;
+  id: string;
   text?: string;
 }
 
@@ -29,13 +30,13 @@ export const todoReducer = (state: Todos, action: Actions) => {
 };
 
 function App(props: any) {
-  const [newTodo, setNewTodo] = useState("");
+  const [newTodo, setNewTodo] = useState<string>("");
+  const [showIncompleteTodos, setShowIncompleteTodos] = useState(false);
   const todos: Todos = props.todos;
-  const todosLength = todos.length;
-  console.log("todos state: ", todos);
+  console.log("redux state", todos);
   return (
     <div>
-      <form onSubmit={event => props.addTodo(event, newTodo, todosLength)}>
+      <form onSubmit={event => props.addTodo(event, newTodo)}>
         <label>Add a Todo:</label>
         <input
           onChange={event => setNewTodo(event.target.value)}
@@ -45,24 +46,37 @@ function App(props: any) {
         />
         <button> Add a Todo</button>
       </form>
-      {todos.map((t, index) => (
-        <div
-          key={index}
-          style={{ textDecoration: t.isComplete ? "line-through" : undefined }}
-        >
-          <li onClick={event => props.toggleTodo(event, index)}>{t.text}</li>
-          <button onClick={event => props.deleteTodo(event, index)}>
-            Delete Todo
-          </button>
-        </div>
-      ))}
+      {todos
+        .filter(t => {
+          if (showIncompleteTodos) {
+            return t.isComplete ? false : t;
+          } else {
+            return t;
+          }
+        })
+        .map(t => (
+          <div
+            key={t.id}
+            style={{
+              textDecoration: t.isComplete ? "line-through" : undefined
+            }}
+          >
+            <li onClick={event => props.toggleTodo(event, t.id)}>{t.text}</li>
+            <button onClick={event => props.deleteTodo(event, t.id)}>
+              Delete Todo
+            </button>
+          </div>
+        ))}
+      <button onClick={() => setShowIncompleteTodos(!showIncompleteTodos)}>
+        {showIncompleteTodos ? "Show all todos" : "Show incomplete todos"}
+      </button>
     </div>
   );
 }
 
 const deleteTodo = (
   e: MouseEvent<HTMLButtonElement>,
-  index: number
+  index: string
 ): Actions => {
   return {
     type: "DELETE_TODO",
@@ -70,24 +84,19 @@ const deleteTodo = (
   };
 };
 
-const toggleTodo = (e: MouseEvent<HTMLLIElement>, index: number): Actions => {
+const toggleTodo = (e: MouseEvent<HTMLLIElement>, index: string): Actions => {
   return {
     type: "TOGGLE_TODO",
     id: index
   };
 };
 
-const addTodo = (
-  e: FormEvent<HTMLFormElement>,
-  newTodo: string,
-  todosLength: number
-): Actions => {
-  console.log("new todo: ", newTodo, "id: ", todosLength);
+const addTodo = (e: FormEvent<HTMLFormElement>, todoText: string): Actions => {
   e.preventDefault();
   return {
     type: "ADD_TODO",
-    id: todosLength,
-    text: newTodo
+    id: uuid(),
+    text: todoText
   };
 };
 

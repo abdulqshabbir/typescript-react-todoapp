@@ -3,11 +3,11 @@ import ReactDOM from "react-dom";
 import App, { todoReducer } from "./App";
 import { Provider } from "react-redux";
 import { createStore } from "redux";
-
+import uuid from "uuid";
 const initialState = [
-  { text: "Study some programming", isComplete: false, id: 0 },
-  { text: "Build programming website", isComplete: false, id: 1 },
-  { text: "Get office drinks", isComplete: true, id: 2 }
+  { text: "Study some programming", isComplete: false, id: uuid() },
+  { text: "Build programming website", isComplete: false, id: uuid() },
+  { text: "Get office drinks", isComplete: true, id: uuid() }
 ];
 
 export const store = createStore(todoReducer, initialState);
